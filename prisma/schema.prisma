@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  industry  String
+  size      String
+  location  String
+  revenue   Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contacts Contact[]
+  deals    Deal[]
+  activities Activity[]
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  phone     String?
+  status    String   @default("active")
+  owner     String?
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  deals     Deal[]
+  activities Activity[]
+
+  @@index([companyId])
+  @@index([status])
+}
+
+model Deal {
+  id        String   @id @default(cuid())
+  title     String
+  value     Float
+  stage     String
+  probability Int
+  closeDate DateTime
+  companyId String
+  contactId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  activities Activity[]
+
+  @@index([companyId])
+  @@index([contactId])
+  @@index([stage])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String
+  description String
+  companyId String
+  contactId String?
+  dealId    String?
+  createdAt DateTime @default(now())
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  deal      Deal? @relation(fields: [dealId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([contactId])
+  @@index([dealId])
+}
+
