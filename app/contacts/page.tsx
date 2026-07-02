@@ -19,6 +19,7 @@ export default function Contacts() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -54,9 +55,12 @@ export default function Contacts() {
     try {
       if (editingId) {
         await updateContact(editingId, formData);
+        setSaveMessage('Contact updated!');
       } else {
         await createContact(formData);
+        setSaveMessage('Contact saved!');
       }
+      setTimeout(() => setSaveMessage(null), 2000);
       setIsModalOpen(false);
       setEditingId(null);
       setFormData({
@@ -71,6 +75,8 @@ export default function Contacts() {
       loadData();
     } catch (error) {
       console.error('Failed to save contact:', error);
+      setSaveMessage('Failed to save contact');
+      setTimeout(() => setSaveMessage(null), 2000);
     }
   }
 
@@ -78,6 +84,8 @@ export default function Contacts() {
     if (confirm('Are you sure?')) {
       try {
         await deleteContact(id);
+        setSaveMessage('Contact deleted!');
+        setTimeout(() => setSaveMessage(null), 2000);
         loadData();
       } catch (error) {
         console.error('Failed to delete contact:', error);
@@ -120,6 +128,11 @@ export default function Contacts() {
     <>
       <Header />
       <div style={styles.container}>
+        {saveMessage && (
+          <div style={styles.toast}>
+            {saveMessage}
+          </div>
+        )}
         <div style={styles.header}>
           <h1 style={styles.title}>Contacts</h1>
           <button style={styles.button} onClick={openNewModal}>
@@ -369,6 +382,19 @@ const styles = {
     fontWeight: 600,
     cursor: 'pointer',
     marginTop: '0.5rem',
+  },
+  toast: {
+    position: 'fixed' as const,
+    top: '20px',
+    right: '20px',
+    background: '#4caf50',
+    color: '#fff',
+    padding: '1rem 1.5rem',
+    borderRadius: '0.5rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+    fontSize: '0.95rem',
+    fontWeight: 500,
+    zIndex: 1000,
   },
 };
 
