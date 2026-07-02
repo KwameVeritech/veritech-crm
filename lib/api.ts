@@ -1,5 +1,16 @@
 const API_BASE = '/api';
 
+// Helper to remove non-updatable fields
+function cleanUpdateData(data: any, fieldsToKeep: string[]) {
+  const cleaned: any = {};
+  fieldsToKeep.forEach(field => {
+    if (field in data) {
+      cleaned[field] = data[field];
+    }
+  });
+  return cleaned;
+}
+
 export async function fetchContacts(status?: string) {
   const url = new URL(`${API_BASE}/contacts`, window.location.origin);
   if (status) url.searchParams.set('status', status);
@@ -25,10 +36,19 @@ export async function createContact(data: any) {
 }
 
 export async function updateContact(id: string, data: any) {
+  const cleanedData = cleanUpdateData(data, [
+    'firstName',
+    'lastName',
+    'email',
+    'phone',
+    'status',
+    'owner',
+    'companyId',
+  ]);
   const res = await fetch(`${API_BASE}/contacts/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify(cleanedData),
   });
   if (!res.ok) throw new Error('Failed to update contact');
   return res.json();
@@ -65,10 +85,17 @@ export async function createCompany(data: any) {
 }
 
 export async function updateCompany(id: string, data: any) {
+  const cleanedData = cleanUpdateData(data, [
+    'name',
+    'industry',
+    'size',
+    'location',
+    'revenue',
+  ]);
   const res = await fetch(`${API_BASE}/companies/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify(cleanedData),
   });
   if (!res.ok) throw new Error('Failed to update company');
   return res.json();
