@@ -15,6 +15,7 @@ export default function Companies() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     industry: '',
@@ -44,9 +45,12 @@ export default function Companies() {
     try {
       if (editingId) {
         await updateCompany(editingId, formData);
+        setSaveMessage('Company updated!');
       } else {
         await createCompany(formData);
+        setSaveMessage('Company saved!');
       }
+      setTimeout(() => setSaveMessage(null), 2000);
       setIsModalOpen(false);
       setEditingId(null);
       setFormData({
@@ -59,6 +63,8 @@ export default function Companies() {
       loadData();
     } catch (error) {
       console.error('Failed to save company:', error);
+      setSaveMessage('Failed to save company');
+      setTimeout(() => setSaveMessage(null), 2000);
     }
   }
 
@@ -66,6 +72,8 @@ export default function Companies() {
     if (confirm('Are you sure?')) {
       try {
         await deleteCompany(id);
+        setSaveMessage('Company deleted!');
+        setTimeout(() => setSaveMessage(null), 2000);
         loadData();
       } catch (error) {
         console.error('Failed to delete company:', error);
@@ -106,6 +114,11 @@ export default function Companies() {
     <>
       <Header />
       <div style={styles.container}>
+        {saveMessage && (
+          <div style={styles.toast}>
+            {saveMessage}
+          </div>
+        )}
         <div style={styles.header}>
           <h1 style={styles.title}>Companies</h1>
           <button style={styles.button} onClick={openNewModal}>
@@ -327,6 +340,19 @@ const styles = {
     fontWeight: 600,
     cursor: 'pointer',
     marginTop: '0.5rem',
+  },
+  toast: {
+    position: 'fixed' as const,
+    top: '20px',
+    right: '20px',
+    background: '#4caf50',
+    color: '#fff',
+    padding: '1rem 1.5rem',
+    borderRadius: '0.5rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+    fontSize: '0.95rem',
+    fontWeight: 500,
+    zIndex: 1000,
   },
 };
 
