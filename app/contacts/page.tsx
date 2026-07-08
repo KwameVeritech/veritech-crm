@@ -19,6 +19,7 @@ export default function Contacts() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -54,9 +55,12 @@ export default function Contacts() {
     try {
       if (editingId) {
         await updateContact(editingId, formData);
+        setSaveMessage('Contact updated!');
       } else {
         await createContact(formData);
+        setSaveMessage('Contact saved!');
       }
+      setTimeout(() => setSaveMessage(null), 2000);
       setIsModalOpen(false);
       setEditingId(null);
       setFormData({
@@ -71,6 +75,8 @@ export default function Contacts() {
       loadData();
     } catch (error) {
       console.error('Failed to save contact:', error);
+      setSaveMessage('Failed to save contact');
+      setTimeout(() => setSaveMessage(null), 2000);
     }
   }
 
@@ -78,6 +84,8 @@ export default function Contacts() {
     if (confirm('Are you sure?')) {
       try {
         await deleteContact(id);
+        setSaveMessage('Contact deleted!');
+        setTimeout(() => setSaveMessage(null), 2000);
         loadData();
       } catch (error) {
         console.error('Failed to delete contact:', error);
@@ -120,6 +128,11 @@ export default function Contacts() {
     <>
       <Header />
       <div style={styles.container}>
+        {saveMessage && (
+          <div style={styles.toast}>
+            {saveMessage}
+          </div>
+        )}
         <div style={styles.header}>
           <h1 style={styles.title}>Contacts</h1>
           <button style={styles.button} onClick={openNewModal}>
@@ -192,79 +205,100 @@ export default function Contacts() {
           title={editingId ? 'Edit Contact' : 'New Contact'}
         >
           <form onSubmit={handleSubmit} style={styles.form}>
-            <input
-              type="text"
-              placeholder="First Name"
-              value={formData.firstName}
-              onChange={(e) =>
-                setFormData({ ...formData, firstName: e.target.value })
-              }
-              style={styles.input}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={(e) =>
-                setFormData({ ...formData, lastName: e.target.value })
-              }
-              style={styles.input}
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              style={styles.input}
-              required
-            />
-            <input
-              type="tel"
-              placeholder="Phone"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              style={styles.input}
-            />
-            <select
-              value={formData.companyId}
-              onChange={(e) =>
-                setFormData({ ...formData, companyId: e.target.value })
-              }
-              style={styles.input}
-              required
-            >
-              <option value="">Select Company</option>
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value })
-              }
-              style={styles.input}
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-            <input
-              type="text"
-              placeholder="Owner"
-              value={formData.owner}
-              onChange={(e) =>
-                setFormData({ ...formData, owner: e.target.value })
-              }
-              style={styles.input}
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>First Name</label>
+              <input
+                type="text"
+                placeholder="Enter first name"
+                value={formData.firstName}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
+                style={styles.input}
+                required
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Last Name</label>
+              <input
+                type="text"
+                placeholder="Enter last name"
+                value={formData.lastName}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
+                style={styles.input}
+                required
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Email</label>
+              <input
+                type="email"
+                placeholder="Enter email address"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                style={styles.input}
+                required
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Phone</label>
+              <input
+                type="tel"
+                placeholder="Enter phone number"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+                style={styles.input}
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Company</label>
+              <select
+                value={formData.companyId}
+                onChange={(e) =>
+                  setFormData({ ...formData, companyId: e.target.value })
+                }
+                style={styles.input}
+                required
+              >
+                <option value="">Select a company</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) =>
+                  setFormData({ ...formData, status: e.target.value })
+                }
+                style={styles.input}
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Owner</label>
+              <input
+                type="text"
+                placeholder="Enter owner name"
+                value={formData.owner}
+                onChange={(e) =>
+                  setFormData({ ...formData, owner: e.target.value })
+                }
+                style={styles.input}
+              />
+            </div>
             <button type="submit" style={styles.submitBtn}>
               {editingId ? 'Update' : 'Create'}
             </button>
@@ -353,6 +387,16 @@ const styles = {
     flexDirection: 'column' as const,
     gap: '1rem',
   },
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '0.5rem',
+  },
+  label: {
+    fontWeight: 500,
+    color: '#666',
+    fontSize: '0.9rem',
+  },
   input: {
     padding: '0.75rem',
     borderRadius: '0.5rem',
@@ -369,6 +413,19 @@ const styles = {
     fontWeight: 600,
     cursor: 'pointer',
     marginTop: '0.5rem',
+  },
+  toast: {
+    position: 'fixed' as const,
+    top: '20px',
+    right: '20px',
+    background: '#4caf50',
+    color: '#fff',
+    padding: '1rem 1.5rem',
+    borderRadius: '0.5rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+    fontSize: '0.95rem',
+    fontWeight: 500,
+    zIndex: 1000,
   },
 };
 
